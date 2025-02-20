@@ -1,0 +1,97 @@
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  name: {{ task_instance.task_id.replace("_", "-") }}-{{ execution_date.strftime('%Y%m%d') }}-{{ task_instance.try_number }}
+  labels:
+    some_labels: label_values
+  annotations:
+    some_annotation: annotation_value
+spec:
+  entrypoint: python /opt/xxxx/daily/ray_runners/{{ task_instance.task_id }}/{{ task_instance.task_id }}.py --ds='{{ execution_date.strftime('%Y%m%d') }}' --execution-date='{{ execution_date }}' --execution-date-ios='{{ execution_date.isoformat(sep=" ", timespec="seconds") }}'
+  shutdownAfterJobFinishes: false
+#  ttlSecondsAfterFinished: 60
+  runtimeEnvYAML: |
+    pip:
+      {{ to_yaml_list_with_indent(params.pip_package_list, 6) }}
+    working_dir: /opt/xxxx/daily/ray_runners/{{ task_instance.task_id }}
+    env_vars:
+      SPARK_CONF_DIR: "/etc/spark/conf"
+
+  rayClusterSpec:
+    rayVersion: '2.9.0'
+    headGroupSpec:
+      rayStartParams:
+        num-cpus: "0"
+        dashboard-host: '0.0.0.0'
+      template:
+        metadata:
+          labels:
+            some_labels: label_values
+          annotations:
+            some_annotation: annotation_value
+        spec:
+          serviceAccountName: spark
+          containers:
+            - name: ray-head
+              image: ray_image:version
+              imagePullPolicy: Always
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265 # Ray dashboard
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+              resources:
+                limits:
+                  cpu: "7"
+                  memory: "27G"
+                requests:
+                  cpu: "7"
+                  memory: "27G"
+
+    workerGroupSpecs:
+      - replicas: 5
+        minReplicas: 5
+        maxReplicas: 30
+        groupName: small-group
+        rayStartParams: {}
+        #pod template
+        template:
+          metadata:
+            labels:
+              some_labels: label_values
+            annotations:
+              some_annotation: annotation_value
+          spec:
+            serviceAccountName: spark
+            containers:
+              - name: ray-worker
+                image: ray_image:version
+                imagePullPolicy: Always
+                lifecycle:
+                  preStop:
+                    exec:
+                      command: [ "/bin/sh","-c","ray stop" ]
+                resources:
+                  limits:
+                    cpu: "7"
+                    memory: "27G"
+                  requests:
+                    cpu: "7"
+                    memory: "27G"
+
+  submitterPodTemplate:
+    metadata:
+      labels:
+        some_labels: label_values
+      annotations:
+        some_annotation: annotation_value
+    spec:
+      restartPolicy: Never
+      serviceAccountName: spark
+      containers:
+        - name: rayjob-submitter-pod
+          image: ray_image:version
+          imagePullPolicy: Always
+
