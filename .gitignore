@@ -1,0 +1,7 @@
+*.pyc
+*.log
+.idea/*
+.coverage
+cover/
+venv/
+.DS_Store
