@@ -61,9 +61,7 @@ def on_failure_callback(context):
         logging.info('context is none when on_failure_callback')
         return
 
-    airflow_owner_mail = Variable.get(
-        'AIRFLOW_OWNER_EMAIL',
-        'some@app.com')
+    airflow_owner_mail = Variable.get('AIRFLOW_OWNER_EMAIL', 'some@app.com')
     ti = context['task_instance']
     task = context['task']
 
@@ -96,15 +94,15 @@ def create_external_task_sensor(task_id,
 
 
 def create_ray_per_job_operator(task_id,
-                                        dag,
-                                        application_file: str,
-                                        timeout,
-                                        k8s_namespace,
-                                        kubernetes_conn_id,
-                                        on_success_callback=None,
-                                        on_failure_callback=None,
-                                        params=None,
-                                        attach_log=True):
+                                dag,
+                                application_file: str,
+                                timeout,
+                                k8s_namespace,
+                                kubernetes_conn_id,
+                                on_success_callback=None,
+                                on_failure_callback=None,
+                                params=None,
+                                attach_log=True):
     """
 
     :param task_id:
@@ -120,16 +118,16 @@ def create_ray_per_job_operator(task_id,
     :return:
     """
     return RayPerJobOperator(task_id=task_id,
-                               namespace=k8s_namespace,
-                               application_file=application_file,
-                               kubernetes_conn_id=kubernetes_conn_id,
-                               do_xcom_push=True,
-                               attach_log=attach_log,
-                               timeout=timeout,
-                               on_success_callback=on_success_callback,
-                               on_failure_callback=on_failure_callback,
-                               params=params,
-                               dag=dag)
+                             namespace=k8s_namespace,
+                             application_file=application_file,
+                             kubernetes_conn_id=kubernetes_conn_id,
+                             do_xcom_push=True,
+                             attach_log=attach_log,
+                             timeout=timeout,
+                             on_success_callback=on_success_callback,
+                             on_failure_callback=on_failure_callback,
+                             params=params,
+                             dag=dag)
 
 
 start_task = BashOperator(
@@ -154,11 +152,10 @@ ray_per_job_runner = create_ray_per_job_operator(
     on_failure_callback=on_failure_callback,
     params={
         "pip_package_list": [
-            "oss2==2.18.1",
-            "pyspark==3.5.1", "ray==2.9.0", "ray[default]==2.9.0",
-            "raydp==1.6.1", "scipy==1.10.1", "Shapely==1.8.5.post1",
-            "pyhive[trino]==0.6.5", "loguru==0.7.2", "pytz==2023.3",
-            "oss2==2.18.1", "trino==0.326.0", "pandas==2.0.3",
+            "oss2==2.18.1", "pyspark==3.5.1", "ray==2.9.0",
+            "ray[default]==2.9.0", "raydp==1.6.1", "scipy==1.10.1",
+            "Shapely==1.8.5.post1", "pyhive[trino]==0.6.5", "loguru==0.7.2",
+            "pytz==2023.3", "oss2==2.18.1", "trino==0.326.0", "pandas==2.0.3",
             "SQLAlchemy==1.4.46", "ossfs==2023.12.0", "duckdb==1.1.3"
         ],
         "task_owner":
