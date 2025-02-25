@@ -7,7 +7,7 @@ def read_long_description():
     try:
         return Path("README.md").read_text(encoding="utf-8")
     except FileNotFoundError:
-        return "A description of MiniRAG is currently unavailable."
+        return "A description of airflow_ray_perjob_operator is currently unavailable."
 
 
 def read_requirements():
