@@ -11,3 +11,5 @@ pip install -e ./ or pip install https://github.com/zhangkuantian/airflow_ray_pe
 
 more detail sess: [example](examples/example.py)
 
+## Release Notes
+- v0.0.1 add airflow_ray_perjob_operator
