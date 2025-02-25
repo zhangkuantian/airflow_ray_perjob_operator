@@ -14,7 +14,7 @@ from airflow.models import Variable
 from airflow.operators.bash import BashOperator
 from airflow.sensors.external_task import ExternalTaskSensor
 
-from ray_perjob_operator import RayPerJobOperator, create_ray_per_job_k8s_operator
+from ray_perjob_operator import create_ray_per_job_k8s_operator
 
 local_tz = pendulum.timezone("Asia/Shanghai")
 start_date = datetime.now(tz=local_tz).replace(
