@@ -14,7 +14,7 @@ from airflow.models import Variable
 from airflow.operators.bash import BashOperator
 from airflow.sensors.external_task import ExternalTaskSensor
 
-from ray_perjob_operator import RayPerJobOperator
+from ray_perjob_operator import RayPerJobOperator, create_ray_per_job_k8s_operator
 
 local_tz = pendulum.timezone("Asia/Shanghai")
 start_date = datetime.now(tz=local_tz).replace(
@@ -93,43 +93,6 @@ def create_external_task_sensor(task_id,
                               timeout=timeout)
 
 
-def create_ray_per_job_operator(task_id,
-                                dag,
-                                application_file: str,
-                                timeout,
-                                k8s_namespace,
-                                kubernetes_conn_id,
-                                on_success_callback=None,
-                                on_failure_callback=None,
-                                params=None,
-                                attach_log=True):
-    """
-
-    :param task_id:
-    :param dag:
-    :param application_file:
-    :param timeout:
-    :param k8s_namespace:
-    :param params:
-    :param kubernetes_conn_id:
-    :param on_success_callback:
-    :param on_failure_callback:
-    :param attach_log:
-    :return:
-    """
-    return RayPerJobOperator(task_id=task_id,
-                             namespace=k8s_namespace,
-                             application_file=application_file,
-                             kubernetes_conn_id=kubernetes_conn_id,
-                             do_xcom_push=True,
-                             attach_log=attach_log,
-                             timeout=timeout,
-                             on_success_callback=on_success_callback,
-                             on_failure_callback=on_failure_callback,
-                             params=params,
-                             dag=dag)
-
-
 start_task = BashOperator(
     task_id="start_task",
     bash_command="for i in {1..180}; do echo ${i}; sleep 1; done",
@@ -141,7 +104,7 @@ wait_external_dag_task = create_external_task_sensor(
     external_task_id="external_task_id",
     execution_delta=None)
 
-ray_per_job_runner = create_ray_per_job_operator(
+ray_per_job_runner = create_ray_per_job_k8s_operator(
     task_id="ray_per_job_runner",
     dag=dag,
     application_file="ray_yaml/per_job_template.yaml",
