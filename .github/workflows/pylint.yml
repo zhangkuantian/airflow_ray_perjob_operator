@@ -17,7 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint && pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-    - name: Analysing the code with pylint
+        pip install yapf==0.31.0 && pip install -r requirements.txt
+    - name: Analysing the code with yapf
       run: |
-        pylint $(git ls-files '*.py')
+        yapf --style .yapf-code-style --diff --recursive ./ --exclude venv
