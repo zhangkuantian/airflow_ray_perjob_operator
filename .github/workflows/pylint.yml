@@ -17,6 +17,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        sudo apt-get install gcc libsasl2-dev g++ -y
         pip install yapf==0.31.0 && pip install -r requirements.txt
     - name: Analysing the code with yapf
       run: |
